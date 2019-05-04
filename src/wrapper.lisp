@@ -3,6 +3,10 @@
   (:export :define-wrapper-helpers))
 (in-package :chipmunk.wrapper)
 
+(defmacro new-collected (creation-form &optional (freeing-fun 'autowrap:free))
+  `(autowrap:autocollect (ptr) ,creation-form
+     (,freeing-fun ptr)))
+
 (defmacro define-wrapper-accessor (for-type accessor-name)
   "Defines an accessor function for a wrapper type `for-type`,
    where the underlying wraper is of type `wrapper-type` and the field is named `accessor-name`.
@@ -28,9 +32,7 @@
           (intern (format nil "MAKE-~A" (symbol-name for-type)))) )
     `(progn
        (defun ,fun-name ,fields
-         (let* ((alloced-obj (autowrap:alloc ',for-type))
-                (ptr (autowrap:ptr alloced-obj)))
-           (tg:finalize alloced-obj (lambda () (autowrap:free ptr)))
+         (let* ((alloced-obj (new-collected (autowrap:alloc ',for-type))))
 
            ,@(mapcar
               (lambda (field)
