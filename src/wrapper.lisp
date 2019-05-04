@@ -7,9 +7,9 @@
   "Defines an accessor function for a wrapper type `for-type`,
    where the underlying wraper is of type `wrapper-type` and the field is named `accessor-name`.
    Arguments are not evaluated"
-  (let ((fun-name (intern (format nil "~A-~A" (symbol-name for-type) (symbol-name accessor-name)))))
+  (let ((fun-name (intern (symbol-name accessor-name))))
     `(progn
-       (defun ,fun-name (o)
+       (defmethod ,fun-name ((o ,for-type))
          (,(intern (format nil "~A.~A" (symbol-name for-type) (symbol-name accessor-name))
                    (package-name (symbol-package for-type)))
           o))
