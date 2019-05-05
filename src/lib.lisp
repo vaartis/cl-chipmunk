@@ -3,18 +3,18 @@
   (:shadow :position :step)
   (:export
 
-   :make-space
+   :make-space :free-space
    :gravity :step :add
 
    :body
 
-   :make-segment-shape :make-circle-shape :make-box-shape
+   :make-segment-shape :make-circle-shape :make-box-shape :free-shape
    :friction
 
 
    :moment-for-circle :moment-for-box
 
-   :make-body :velocity :position))
+   :make-body :free-body :velocity :position))
 (in-package :chipmunk)
 
 (cffi:define-foreign-library chipmunk
@@ -25,8 +25,8 @@
 
 (chipmunk.wrapper:define-wrapper-helpers chipmunk.autowrap:cp-vect (x y))
 
-(defun make-space ()
-  (chipmunk.wrapper::new-collected (chipmunk.autowrap:cp-space-new) chipmunk.autowrap:cp-space-free))
+(defun make-space () (chipmunk.autowrap:cp-space-new))
+(defun free-space (space) (chipmunk.autowrap:cp-space-free space))
 
 (defmethod gravity ((space chipmunk.autowrap:cp-space))
   ;; Create an empty-ish gravity vector and assign it the return value
@@ -55,25 +55,22 @@
   (chipmunk.autowrap:cp-space-get-static-body space))
 
 (defun make-segment-shape (body a b radius)
-  (chipmunk.wrapper::new-collected
-      (autowrap:make-wrapper-instance
-       'chipmunk.autowrap:cp-shape
-       :ptr (chipmunk.autowrap:cp-segment-shape-new body a b radius))
-      chipmunk.autowrap:cp-shape-free))
+  (autowrap:make-wrapper-instance
+   'chipmunk.autowrap:cp-shape
+   :ptr (chipmunk.autowrap:cp-segment-shape-new body a b radius)))
 
 (defun make-circle-shape (body radius offset)
-  (chipmunk.wrapper::new-collected
-      (autowrap:make-wrapper-instance
-       'chipmunk.autowrap:cp-shape
-       :ptr (chipmunk.autowrap:cp-circle-shape-new body radius offset))
-      chipmunk.autowrap:cp-shape-free))
+  (autowrap:make-wrapper-instance
+   'chipmunk.autowrap:cp-shape
+   :ptr (chipmunk.autowrap:cp-circle-shape-new body radius offset)))
 
 (defun make-box-shape (body width height radius)
-  (chipmunk.wrapper::new-collected
-      (autowrap:make-wrapper-instance
-       'chipmunk.autowrap:cp-shape
-       :ptr (chipmunk.autowrap:cp-box-shape-new body width height radius))
-      chipmunk.autowrap:cp-shape-free))
+  ;; TODO: figure out why box returns a wrapper but other shape creators don't
+  ;; (probably libffi related, since they require pass-by-value)
+  (chipmunk.autowrap:cp-box-shape-new body width height radius))
+
+(defun free-shape (shape)
+  (chipmunk.autowrap:cp-shape-free shape))
 
 (defmethod friction ((shape chipmunk.autowrap:cp-shape))
   (chipmunk.autowrap:cp-shape-get-friction shape))
@@ -87,9 +84,9 @@
 (defun moment-for-box (mass width height)
   (chipmunk.autowrap:cp-moment-for-box mass width height))
 
-(defun make-body (mass moment)
-  (chipmunk.wrapper::new-collected (chipmunk.autowrap:cp-body-new mass moment)
-      chipmunk.autowrap:cp-body-free))
+(defun make-body (mass moment) (chipmunk.autowrap:cp-body-new mass moment))
+
+(defun free-body (body) (chipmunk.autowrap:cp-body-free body))
 
 (defmethod velocity ((body chipmunk.autowrap:cp-body))
   (let ((ret (make-cp-vect 0d0 0d0)))
