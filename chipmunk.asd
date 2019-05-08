@@ -5,9 +5,9 @@
   :depends-on (:trivial-garbage :cl-autowrap/libffi)
   :pathname "src"
   :components
-  ((:file "autowrap")
-   (:module specs
+  ((:module specs
     :components
     ((:static-file "chipmunk.h")))
+   (:file "autowrap")
    (:file "wrapper")
    (:file "lib")))
