@@ -18,6 +18,8 @@
 
    :collision-type :collision-handler-for :with-collision-handler-for
 
+   :user-data
+
    :begin-collision-fun :define-collision-begin-callback
 
    :shapes))
@@ -115,6 +117,17 @@
 (defmethod (setf collision-type) (type (shape chipmunk.autowrap:cp-shape))
   (chipmunk.autowrap:cp-shape-set-collision-type shape type))
 
+
+(defgeneric user-data (from))
+
+(defgeneric (setf user-data) (data from))
+
+(defmethod user-data ((from chipmunk.autowrap:cp-shape))
+  "Stores a pointer to the user-data part of the shape. The argument should be a CFFI pointer."
+  (chipmunk.autowrap:cp-shape-get-user-data from))
+
+(defmethod (setf user-data) (data (from chipmunk.autowrap:cp-shape))
+  (chipmunk.autowrap:cp-shape-set-user-data from data))
 
 (defun collision-handler-for (space collision-type-a &optional collision-type-b)
   "Returns or creates a collision handler for type a and b, or for type a and everything else"
