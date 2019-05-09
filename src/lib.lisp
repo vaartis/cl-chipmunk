@@ -201,12 +201,13 @@
        ((arbiter-ptr :pointer)
         (space-ptr :pointer)
         (data-ptr :pointer))
-     (let ((,arbiter-var
-             (autowrap:make-wrapper-instance 'chipmunk.autowrap:cp-arbiter :ptr arbiter-ptr))
-           (,space-var
-             (autowrap:make-wrapper-instance 'chipmunk.autowrap:cp-space :ptr space-ptr))
-           ;; If the user chose to declare data as ignorable, it'd be in the same scope and
-           ;; the compiler will not issue a warning
-           (,data-var data-ptr))
-       ,@body)))
-
+     (let ((result
+             (let ((,arbiter-var
+                     (autowrap:make-wrapper-instance 'chipmunk.autowrap:cp-arbiter :ptr arbiter-ptr))
+                   (,space-var
+                     (autowrap:make-wrapper-instance 'chipmunk.autowrap:cp-space :ptr space-ptr))
+                   ;; If the user chose to declare data as ignorable, it'd be in the same scope and
+                   ;; the compiler will not issue a warning
+                   (,data-var data-ptr))
+               ,@body)))
+       (ecase result ;; Check that the function returns either 0 or 1
