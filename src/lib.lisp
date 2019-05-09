@@ -16,6 +16,8 @@
 
    :make-body :free-body :velocity :position
 
+   :register-collision-type :collision-type-name-to-value :collision-type-value-to-name
+   :clear-collision-types
    :collision-type :collision-handler-for :with-collision-handler-for
 
    :user-data
@@ -110,12 +112,39 @@
 (defmethod (setf position) ((new-pos chipmunk.autowrap:cp-vect) (body chipmunk.autowrap:cp-body))
   (chipmunk.autowrap:cp-body-set-position body new-pos))
 
+(defparameter *next-collision-type-num* 0)
+(defparameter *collision-types* (make-hash-table))
+
+(defun register-collision-type (type-name)
+  "Registers a collision type under as type-name, for use in collision-type and (setf collision-type)"
+  (when (gethash type-name *collision-types*)
+    (error "Collision type ~A already registered" type-name))
+  (setf (gethash type-name *collision-types*) (incf *next-collision-type-num*)))
+
+(defun clear-collision-types ()
+  "Clears the stored collision types table and reset the valuecounter"
+  (setf *collision-types* (make-hash-table))
+  (setf *next-collision-type-num* 0))
+
+(defun collision-type-name-to-value (type-name)
+  "Returns a value corresponding to the collision type"
+  (gethash type-name *collision-types*))
+
+(defun collision-type-value-to-name (type-value)
+  "Returns a name corresponding to collision type value"
+  (loop for k being the hash-keys of *collision-types*
+        using (hash-value v)
+        when (= v type-value) return k))
 
 (defmethod collision-type ((shape chipmunk.autowrap:cp-shape))
-  (chipmunk.autowrap:cp-shape-get-collision-type shape))
+  (gethash
+   (collision-type-value-to-name (chipmunk.autowrap:cp-shape-get-collision-type shape))
+   *collision-types*))
 
-(defmethod (setf collision-type) (type (shape chipmunk.autowrap:cp-shape))
-  (chipmunk.autowrap:cp-shape-set-collision-type shape type))
+(defmethod (setf collision-type) (type-name (shape chipmunk.autowrap:cp-shape))
+  (chipmunk.autowrap:cp-shape-set-collision-type
+   shape
+   (collision-type-name-to-value type-name)))
 
 
 (defgeneric user-data (from))
@@ -130,10 +159,15 @@
   (chipmunk.autowrap:cp-shape-set-user-data from data))
 
 (defun collision-handler-for (space collision-type-a &optional collision-type-b)
-  "Returns or creates a collision handler for type a and b, or for type a and everything else"
+  "Returns or creates a collision handler for collision type names a and b, or for type name a and everything else"
   (if collision-type-b
-      (chipmunk.autowrap:cp-space-add-collision-handler space collision-type-a collision-type-b)
-      (chipmunk.autowrap:cp-space-add-wildcard-handler space collision-type-a)))
+      (chipmunk.autowrap:cp-space-add-collision-handler
+       space
+       (collision-type-name-to-value collision-type-a)
+       (collision-type-name-to-value collision-type-b))
+      (chipmunk.autowrap:cp-space-add-wildcard-handler
+       space
+       (collision-type-name-to-value collision-type-a))))
 
 (defmacro with-collision-handler-for
     ((handler-name (space collision-type-a &optional collision-type-b)) &body body)
