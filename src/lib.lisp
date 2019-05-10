@@ -20,6 +20,13 @@
    :clear-collision-types
    :collision-type :collision-handler-for :with-collision-handler-for
 
+
+   :register-shape-filter-category :shape-filter-category-name-to-value :shape-filter-category-value-to-name
+   :clear-shape-filter-categories
+   :categories :has-category?
+   :mask :mask-has-category?
+   :make-shape-filter
+
    :user-data
 
    :begin-collision-fun :define-collision-begin-callback
@@ -122,13 +129,14 @@
 (defparameter *collision-types* (make-hash-table))
 
 (defun register-collision-type (type-name)
-  "Registers a collision type under as type-name, for use in collision-type and (setf collision-type)"
+  "Registers a collision type under as type-name, for use in collision-type and (setf collision-type).
+   Collision types are used to trigger callbacks when some objects collide"
   (when (gethash type-name *collision-types*)
     (error "Collision type ~A already registered" type-name))
   (setf (gethash type-name *collision-types*) (incf *next-collision-type-num*)))
 
 (defun clear-collision-types ()
-  "Clears the stored collision types table and reset the valuecounter"
+  "Clears the stored collision types table and reset the value counter"
   (setf *collision-types* (make-hash-table))
   (setf *next-collision-type-num* 0))
 
@@ -225,3 +233,73 @@
        (ecase result ;; Check that the function returns either 0 or 1
          ((0 1) result)))))
 
+;; The first value will be 0 after incf
+(defparameter *next-collision-filter-power* -1)
+
+(defparameter *shape-filter-categories* (make-hash-table))
+
+(defun clear-shape-filter-categories ()
+  (setf *shape-filter-categories* (make-hash-table)))
+
+(defun register-shape-filter-category (category-name)
+  (let ((category-number (expt 2 (incf *next-collision-filter-power*))))
+
+    (when (gethash category-name *shape-filter-categories*)
+      (error "Shape filter category ~A already registered" category-name))
+
+    (setf (gethash category-name *shape-filter-categories*) category-number)))
+
+(defun shape-filter-category-name-to-value (category-name)
+  "Returns a value corresponding to the collision type"
+  (gethash category-name *shape-filter-categories*))
+
+(defun shape-filter-category-value-to-name (category-value)
+  "Returns a name corresponding to collision type value"
+  (loop for k being the hash-keys of *shape-filter-categories*
+        using (hash-value v)
+        when (= v category-value) return k))
+
+(defmethod categories ((filter chipmunk.autowrap:cp-shape-filter))
+  "Returns the number value of categories (use has-category? if you want to check
+   if the object is in a category)"
+  (chipmunk.autowrap:cp-shape-filter.categories filter))
+
+(defmethod (setf categories) ((filter chipmunk.autowrap:cp-shape-filter) category-name-list)
+  "Using category names, Sets the categories the filter belongs to"
+  (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
+         (categories-value (apply #'logior category-value-list)))
+    (setf (chipmunk.autowrap:cp-shape-filter.categories filter) categories-value)))
+
+(defmethod has-category? ((filter chipmunk.autowrap:cp-shape-filter) category-name)
+  "Checks if the filter category is in the category named by category-name"
+  (let ((category-value (shape-filter-category-name-to-value category-name))
+        (categories (categories filter)))
+    (not (zerop (logand categories category-value)))))
+
+(defmethod mask ((filter chipmunk.autowrap:cp-shape-filter))
+  "Returns the number value of the filter mask (use mask-has-category? if you want to check
+   if the mask has a category)"
+  (chipmunk.autowrap:cp-shape-filter.mask filter))
+
+(defmethod (setf mask) ((filter chipmunk.autowrap:cp-shape-filter) category-name-list)
+  "Using category names, Sets the mask the filter uses"
+  (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
+         (categories-value (apply #'logior category-value-list)))
+    (setf (chipmunk.autowrap:cp-shape-filter.mask filter) categories-value)))
+
+(defmethod mask-has-category? ((filter chipmunk.autowrap:cp-shape-filter) category-name)
+  "Checks if the filter mask has the category named by category-name"
+  (let ((category-value (shape-filter-category-name-to-value category-name))
+        (mask (mask filter)))
+    (not (zerop (logand mask category-value)))))
+
+;; TODO: groups
+
+(defun make-shape-filter (category-names mask-category-names)
+  (let* ((alloced-obj (chipmunk.wrapper::new-collected
+                          (autowrap:alloc 'chipmunk.autowrap:cp-shape-filter))))
+
+    (setf (categories alloced-obj) category-names)
+    (setf (mask alloced-obj) mask-category-names)
+
+    alloced-obj))
