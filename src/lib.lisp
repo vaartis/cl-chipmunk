@@ -164,6 +164,12 @@
 (defmethod (setf user-data) (data (from chipmunk.autowrap:cp-shape))
   (chipmunk.autowrap:cp-shape-set-user-data from data))
 
+(defmethod user-data ((from chipmunk.autowrap:cp-body))
+  (chipmunk.autowrap:cp-body-get-user-data from))
+
+(defmethod (setf user-data) (data (from chipmunk.autowrap:cp-body))
+  (chipmunk.autowrap:cp-body-set-user-data from data))
+
 (defun collision-handler-for (space collision-type-a &optional collision-type-b)
   "Returns or creates a collision handler for collision type names a and b, or for type name a and everything else"
   (if collision-type-b
