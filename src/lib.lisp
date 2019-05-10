@@ -1,5 +1,5 @@
 (defpackage :chipmunk
-  (:use :cl :plus-c)
+  (:use :cl)
   (:shadow :position :step :remove)
   (:export
 
