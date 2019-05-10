@@ -1,10 +1,10 @@
 (defpackage :chipmunk
   (:use :cl :plus-c)
-  (:shadow :position :step)
+  (:shadow :position :step :remove)
   (:export
 
    :make-space :free-space
-   :gravity :step :add
+   :gravity :step :add :remove
 
    :body
 
@@ -59,6 +59,12 @@
   (chipmunk.autowrap:cp-space-add-body space body)
 
   body)
+
+(defgeneric remove (space what))
+(defmethod remove ((space chipmunk.autowrap:cp-space) (shape chipmunk.autowrap:cp-shape))
+  (chipmunk.autowrap:cp-space-remove-shape space shape))
+(defmethod remove ((space chipmunk.autowrap:cp-space) (body chipmunk.autowrap:cp-body))
+  (chipmunk.autowrap:cp-space-remove-body space body))
 
 (defgeneric body (from))
 (defmethod body ((space chipmunk.autowrap:cp-space))
