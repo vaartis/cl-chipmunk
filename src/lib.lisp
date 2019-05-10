@@ -211,3 +211,5 @@
                    (,data-var data-ptr))
                ,@body)))
        (ecase result ;; Check that the function returns either 0 or 1
+         ((0 1) result)))))
+
