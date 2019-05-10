@@ -195,7 +195,8 @@
   `(let ((,handler-name (collision-handler-for ,space ,collision-type-a ,collision-type-b)))
      ,@body))
 
-(defmethod begin-collision-fun ((handler chipmunk.autowrap:cp-collision-handler)))
+(defmethod begin-collision-fun ((handler chipmunk.autowrap:cp-collision-handler))
+  (chipmunk.autowrap:cp-collision-handler.begin-func handler))
 
 (defmethod (setf begin-collision-fun) (fun (handler chipmunk.autowrap:cp-collision-handler))
   (setf (chipmunk.autowrap:cp-collision-handler.begin-func handler) (autowrap:callback fun)))
