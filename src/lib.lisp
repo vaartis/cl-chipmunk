@@ -36,7 +36,7 @@
 
 (cffi:define-foreign-library chipmunk
   (:windows "chipmunk.dll")
-  (:unix "libchipmunk.so.7.0.2 libchipmunk.so.7 libchipmunk.so")
+  (:unix (:or "libchipmunk.so.7.0.2" "libchipmunk.so.7" "libchipmunk.so"))
   (t (:default "libchipmunk")))
 (cffi:use-foreign-library chipmunk)
 
