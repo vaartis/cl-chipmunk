@@ -25,7 +25,7 @@
    :clear-shape-filter-categories
    :categories :has-category?
    :mask :mask-has-category?
-   :make-shape-filter
+   :make-shape-filter :shape-filter
 
    :user-data
 
@@ -304,3 +304,11 @@
     (setf (mask alloced-obj) mask-category-names)
 
     alloced-obj))
+
+(defmethod (setf shape-filter) ((filter chipmunk.autowrap:cp-shape-filter) (shape chipmunk.autowrap:cp-shape))
+  (chipmunk.autowrap:cp-shape-set-filter shape filter))
+
+(defmethod shape-filter ((shape chipmunk.autowrap:cp-shape))
+  (let ((filter (make-shape-filter '() '())))
+    (chipmunk.autowrap:cp-shape-get-filter filter shape)))
+
