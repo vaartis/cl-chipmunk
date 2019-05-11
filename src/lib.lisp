@@ -266,11 +266,14 @@
    if the object is in a category)"
   (chipmunk.autowrap:cp-shape-filter.categories filter))
 
-(defmethod (setf categories) (category-name-list (filter chipmunk.autowrap:cp-shape-filter))
-  "Using category names, Sets the categories the filter belongs to"
-  (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
-         (categories-value (apply #'logior category-value-list)))
-    (setf (chipmunk.autowrap:cp-shape-filter.categories filter) categories-value)))
+(defmethod (setf categories) (category-names-or-all (filter chipmunk.autowrap:cp-shape-filter))
+  "Using category names or :all, sets the categories the filter belongs to"
+  (setf (chipmunk.autowrap:cp-shape-filter.categories filter)
+        (case category-names-or-all
+          (:all chipmunk.autowrap:+cp-all-categories+)
+          (otherwise
+           (let ((category-value-list (mapcar #'shape-filter-category-name-to-value category-names-or-all)))
+             (apply #'logior category-value-list))))))
 
 (defmethod has-category? ((filter chipmunk.autowrap:cp-shape-filter) category-name)
   "Checks if the filter category is in the category named by category-name"
@@ -283,11 +286,14 @@
    if the mask has a category)"
   (chipmunk.autowrap:cp-shape-filter.mask filter))
 
-(defmethod (setf mask) (category-name-list (filter chipmunk.autowrap:cp-shape-filter))
+(defmethod (setf mask) (category-names-or-all (filter chipmunk.autowrap:cp-shape-filter))
   "Using category names, Sets the mask the filter uses"
-  (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
-         (categories-value (apply #'logior category-value-list)))
-    (setf (chipmunk.autowrap:cp-shape-filter.mask filter) categories-value)))
+  (setf (chipmunk.autowrap:cp-shape-filter.mask filter)
+        (case category-names-or-all
+          (:all chipmunk.autowrap:+cp-all-categories+)
+          (otherwise
+           (let ((category-value-list (mapcar #'shape-filter-category-name-to-value category-names-or-all)))
+             (apply #'logior category-value-list))))))
 
 (defmethod mask-has-category? ((filter chipmunk.autowrap:cp-shape-filter) category-name)
   "Checks if the filter mask has the category named by category-name"
@@ -297,12 +303,14 @@
 
 ;; TODO: groups
 
-(defun make-shape-filter (category-names mask-category-names)
+(defun make-shape-filter (category-names-or-all mask-category-names-or-all)
   (let* ((alloced-obj (chipmunk.wrapper::new-collected
                           (autowrap:alloc 'chipmunk.autowrap:cp-shape-filter))))
 
-    (setf (categories alloced-obj) category-names)
-    (setf (mask alloced-obj) mask-category-names)
+    (setf (categories alloced-obj) category-names-or-all)
+    (setf (mask alloced-obj) mask-category-names-or-all)
+    (setf (chipmunk.autowrap:cp-shape-filter.group alloced-obj)
+          chipmunk.autowrap:+cp-no-group+)
 
     alloced-obj))
 
