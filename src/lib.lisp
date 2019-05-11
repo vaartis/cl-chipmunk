@@ -265,7 +265,7 @@
    if the object is in a category)"
   (chipmunk.autowrap:cp-shape-filter.categories filter))
 
-(defmethod (setf categories) ((filter chipmunk.autowrap:cp-shape-filter) category-name-list)
+(defmethod (setf categories) (category-name-list (filter chipmunk.autowrap:cp-shape-filter))
   "Using category names, Sets the categories the filter belongs to"
   (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
          (categories-value (apply #'logior category-value-list)))
@@ -282,7 +282,7 @@
    if the mask has a category)"
   (chipmunk.autowrap:cp-shape-filter.mask filter))
 
-(defmethod (setf mask) ((filter chipmunk.autowrap:cp-shape-filter) category-name-list)
+(defmethod (setf mask) (category-name-list (filter chipmunk.autowrap:cp-shape-filter))
   "Using category names, Sets the mask the filter uses"
   (let* ((category-value-list (mapcar #'shape-filter-category-name-to-value category-name-list))
          (categories-value (apply #'logior category-value-list)))
