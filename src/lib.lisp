@@ -240,6 +240,7 @@
 (defparameter *shape-filter-categories* (make-hash-table))
 
 (defun clear-shape-filter-categories ()
+  (setf *next-collision-filter-power* -1)
   (setf *shape-filter-categories* (make-hash-table)))
 
 (defun register-shape-filter-category (category-name)
