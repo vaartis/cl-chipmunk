@@ -14,7 +14,8 @@
 
    :moment-for-circle :moment-for-box
 
-   :make-body :free-body :velocity :position
+   :make-body :make-kinematic-body :make-static-body
+   :free-body :velocity :position
 
    :register-collision-type :collision-type-name-to-value :collision-type-value-to-name
    :clear-collision-types
@@ -108,6 +109,10 @@
   (chipmunk.autowrap:cp-moment-for-box mass width height))
 
 (defun make-body (mass moment) (chipmunk.autowrap:cp-body-new mass moment))
+
+(defun make-kinematic-body () (chipmunk.autowrap:cp-body-new-kinematic))
+
+(defun make-static-body () (chipmunk.autowrap:cp-body-new-static))
 
 (defun free-body (body) (chipmunk.autowrap:cp-body-free body))
 
