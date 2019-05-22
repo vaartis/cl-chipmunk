@@ -147,7 +147,10 @@
 
 (defun collision-type-name-to-value (type-name)
   "Returns a value corresponding to the collision type"
-  (gethash type-name *collision-types*))
+  (let ((v (gethash type-name *collision-types*)))
+    (unless v
+      (error "Collision type ~A not registered" type-name))
+    v))
 
 (defun collision-type-value-to-name (type-value)
   "Returns a name corresponding to collision type value"
@@ -258,7 +261,10 @@
 
 (defun shape-filter-category-name-to-value (category-name)
   "Returns a value corresponding to the collision type"
-  (gethash category-name *shape-filter-categories*))
+  (let ((v (gethash category-name *shape-filter-categories*)))
+    (unless v
+      (error "Shape filter ~A not registered" category-name))
+    v))
 
 (defun shape-filter-category-value-to-name (category-value)
   "Returns a name corresponding to collision type value"
