@@ -9,7 +9,7 @@
    :body
 
    :make-segment-shape :make-circle-shape :make-box-shape :free-shape
-   :friction
+   :friction :sensor
 
 
    :moment-for-circle :moment-for-box
@@ -102,6 +102,12 @@
 (defmethod (setf friction) (friction (shape chipmunk.autowrap:cp-shape))
   (chipmunk.autowrap:cp-shape-set-friction shape friction))
 
+(defmethod sensor ((shape chipmunk.autowrap:cp-shape))
+  (not (zerop (chipmunk.autowrap:cp-shape-get-sensor shape))))
+
+(defmethod (setf sensor) (value (shape chipmunk.autowrap:cp-shape))
+  (chipmunk.autowrap:cp-shape-set-sensor shape (if value 1 0)))
+
 (defun moment-for-circle (mass inner-diameter outer-diameter offset)
   (chipmunk.autowrap:cp-moment-for-circle mass inner-diameter outer-diameter offset))
 
@@ -167,7 +173,6 @@
   (chipmunk.autowrap:cp-shape-set-collision-type
    shape
    (collision-type-name-to-value type-name)))
-
 
 (defgeneric user-data (from))
 
