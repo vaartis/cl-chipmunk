@@ -43,7 +43,10 @@
 
 (chipmunk.wrapper:define-wrapper-helpers chipmunk.autowrap:cp-vect (x y))
 
-(defun make-space () (chipmunk.autowrap:cp-space-new))
+(defun make-space ()
+  ;; TODO: remove after few chipmunk releases (they have fixed this in 7.0.3)
+  (sb-int:with-float-traps-masked (:divide-by-zero :invalid)
+    (chipmunk.autowrap:cp-space-new)))
 (defun free-space (space) (chipmunk.autowrap:cp-space-free space))
 
 (defmethod gravity ((space chipmunk.autowrap:cp-space))
